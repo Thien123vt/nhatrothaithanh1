@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { AppState, GlobalSettings, RoomConfig, MonthlyData, BillingPeriod } from './types';
 import { INITIAL_SETTINGS, INITIAL_ROOMS, INITIAL_MONTHLY_DATA } from './constants';
@@ -6,12 +5,13 @@ import { Home, Settings, Lock, History, Image as ImageIcon, Save, BarChart3, Clo
 import { initializeApp, getApp, getApps, FirebaseApp } from "firebase/app";
 import { getFirestore, doc, onSnapshot, setDoc, Firestore } from "firebase/firestore";
 
-import InputDataView from './views/InputDataView';
-import SettingsView from './views/SettingsView';
-import PeriodManagementView from './views/PeriodManagementView';
-import HistoryView from './views/HistoryView';
-import ExportImagesView from './views/ExportImagesView';
-import StatsView from './views/StatsView';
+// Import trực tiếp từ thư mục gốc
+import InputDataView from './InputDataView';
+import SettingsView from './SettingsView';
+import PeriodManagementView from './PeriodManagementView';
+import HistoryView from './HistoryView';
+import ExportImagesView from './ExportImagesView';
+import StatsView from './StatsView';
 
 const LOCAL_STORAGE_KEY = 'thai_thanh_tro_v2_state';
 const CLOUD_CONFIG_KEY = 'thai_thanh_cloud_config';
@@ -129,14 +129,11 @@ const App: React.FC = () => {
         ...prev,
         history: [historyEntry, ...prev.history],
         currentData: newData,
-        billingPeriod: { 
-          fromDate: nextFromDate, 
-          toDate: nextToDate 
-        },
+        billingPeriod: { fromDate: nextFromDate, toDate: nextToDate },
         isLocked: true
       };
     });
-    alert("Đã chốt sổ thành công và chuyển sang kỳ mới!");
+    alert("Đã chốt sổ thành công!");
     setActiveTab('input');
   };
 
@@ -157,7 +154,7 @@ const App: React.FC = () => {
         isLocked: false
       };
     });
-    alert("Đã khôi phục dữ liệu kỳ trước thành công!");
+    alert("Đã khôi phục dữ liệu kỳ trước!");
     setActiveTab('input');
   };
 
@@ -177,15 +174,13 @@ const App: React.FC = () => {
             <div className="bg-yellow-400 p-2 rounded-lg shrink-0"><Home className="text-white" size={24} /></div>
             <h1 className="text-xl font-bold text-slate-800 truncate">Thái Thanh</h1>
           </div>
-          
           <div className="flex items-center gap-2">
              {syncStatus === 'syncing' && <RefreshCw className="animate-spin text-blue-500" size={18} />}
-             {syncStatus === 'online' && <span title="Đã kết nối đám mây"><Cloud className="text-green-500" size={18} /></span>}
-             {syncStatus === 'error' && <span title="Lỗi cấu hình/quyền truy cập"><AlertCircle className="text-red-500" size={18} /></span>}
-             {syncStatus === 'unconfigured' && <span title="Chưa cấu hình đám mây"><CloudOff className="text-slate-300" size={18} /></span>}
+             {syncStatus === 'online' && <span title="Đã kết nối"><Cloud className="text-green-500" size={18} /></span>}
+             {syncStatus === 'error' && <span title="Lỗi"><AlertCircle className="text-red-500" size={18} /></span>}
+             {syncStatus === 'unconfigured' && <span title="Ngoại tuyến"><CloudOff className="text-slate-300" size={18} /></span>}
           </div>
         </div>
-
         <nav className="flex flex-row md:flex-col gap-1 overflow-x-auto scrollbar-hide pb-2 md:pb-0">
           <NavItem active={activeTab === 'input'} onClick={() => setActiveTab('input')} icon={<Save size={20}/>} label="Nhập Liệu" />
           <NavItem active={activeTab === 'stats'} onClick={() => setActiveTab('stats')} icon={<BarChart3 size={20}/>} label="Thống Kê" />
@@ -195,45 +190,12 @@ const App: React.FC = () => {
           <NavItem active={activeTab === 'export'} onClick={() => setActiveTab('export')} icon={<ImageIcon size={20}/>} label="Xuất Ảnh" />
         </nav>
       </aside>
-
       <main className="flex-1 p-4 md:p-8 overflow-x-hidden">
         <div className="max-w-6xl mx-auto">
-          {syncStatus === 'error' && (
-            <div className="mb-6 bg-red-50 border border-red-200 p-4 rounded-2xl flex items-center gap-3 text-red-700 text-sm">
-              <AlertCircle size={20} />
-              <div>
-                <strong>Lỗi kết nối Đám mây:</strong> Vui lòng kiểm tra lại <i>Firebase Config</i> trong Cài đặt hoặc quy trình cấp quyền (Rules) trên Firebase Console.
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'input' && (
-            <InputDataView 
-                state={state} 
-                onDataChange={(d) => updateState(p => ({...p, currentData: d}))} 
-                onPeriodChange={(p) => updateState(prev => ({...prev, billingPeriod: p}))} 
-            />
-          )}
+          {activeTab === 'input' && <InputDataView state={state} onDataChange={(d) => updateState(p => ({...p, currentData: d}))} onPeriodChange={(p) => updateState(prev => ({...prev, billingPeriod: p}))} />}
           {activeTab === 'stats' && <StatsView state={state} />}
-          {activeTab === 'settings' && (
-            <SettingsView 
-              settings={state.globalSettings} rooms={state.rooms} uiFontSize={state.uiFontSize} fullState={state}
-              cloudConfig={cloudConfig}
-              onSettingsChange={(s) => updateState(p => ({...p, globalSettings: s}))}
-              onRoomsChange={(r) => updateState(p => ({...p, rooms: r}))}
-              onFontSizeChange={(s) => updateState(p => ({...p, uiFontSize: s}))}
-              onRestoreState={(s) => setState(s)}
-              onCloudConfigSave={handleCloudConfigSave}
-            />
-          )}
-          {activeTab === 'lock' && (
-            <PeriodManagementView 
-                isLocked={state.isLocked} 
-                onRollover={handleRollover}
-                onReset={handleResetPeriod}
-                onUnlock={() => updateState(p => ({...p, isLocked: false}))} 
-            />
-          )}
+          {activeTab === 'settings' && <SettingsView settings={state.globalSettings} rooms={state.rooms} uiFontSize={state.uiFontSize} fullState={state} cloudConfig={cloudConfig} onSettingsChange={(s) => updateState(p => ({...p, globalSettings: s}))} onRoomsChange={(r) => updateState(p => ({...p, rooms: r}))} onFontSizeChange={(s) => updateState(p => ({...p, uiFontSize: s}))} onRestoreState={(s) => setState(s)} onCloudConfigSave={handleCloudConfigSave} />}
+          {activeTab === 'lock' && <PeriodManagementView isLocked={state.isLocked} onRollover={handleRollover} onReset={handleResetPeriod} onUnlock={() => updateState(p => ({...p, isLocked: false}))} />}
           {activeTab === 'history' && <HistoryView history={state.history} />}
           {activeTab === 'export' && <ExportImagesView state={state} />}
         </div>

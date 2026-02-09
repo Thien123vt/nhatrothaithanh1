@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { RoomConfig, GlobalSettings, MonthlyData, BillingPeriod } from './types';
 import { formatCurrency, formatDate } from './format';
@@ -205,7 +206,7 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ room, data, settings,
             <td className="inv-td inv-b-all inv-text-center">{room.hasWifiTv ? 1 : 0}</td>
             <td className="inv-td inv-b-all inv-text-center">cái</td>
             <td className="inv-td inv-b-all inv-text-right">{formatCurrency(settings.wifiTvPrice)}</td>
-            {/* Fix typo: wifiTvTvTotal -> wifiTvTotal */}
+            {/* Sửa lỗi wifiTvTvTotal thành wifiTvTotal tại đây */}
             <td className="inv-td inv-b-all inv-text-right">{wifiTvTotal > 0 ? formatCurrency(wifiTvTotal) : '-'}</td>
           </tr>
 
