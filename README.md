@@ -37,4 +37,3 @@
 
 ---
 *Phát triển bởi Senior Engineer - Thái Thanh Tro Project.*
-# 1nhatrothaithanh
