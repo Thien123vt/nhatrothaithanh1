@@ -1,0 +1,14 @@
+
+# Các file rác của hệ điều hành
+.DS_Store
+Thumbs.db
+
+# Thư mục build và phụ thuộc (nếu sau này bạn dùng npm)
+node_modules/
+dist/
+build/
+
+# Các file cấu hình cá nhân
+.env
+.vscode/
+.idea/
